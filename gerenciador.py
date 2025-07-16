@@ -26,23 +26,38 @@ class GerenciadorUsuarios(stomp.ConnectionListener):
           # Rejeita usuário duplicado
           self.conn.send(
               body=json.dumps({"status": "rejeitado", "usuario": usuario}),
-              destination=f"/queue/retorno.{usuario}"
+              destination=f"/queue/registro.{usuario}"
           )
           print(f"[REJEITADO] Usuário duplicado: {usuario}")
         else:
           self.usuarios_online.add(usuario)
           self.conn.send(
               body=json.dumps({"status": "aceito", "usuario": usuario}),
-              destination=f"/queue/retorno.{usuario}"
+              destination=f"/queue/registro.{usuario}"
           )
           print(f"[ACEITO] Novo usuário: {usuario}")
+          self.conn.send(
+            body=json.dumps({"usuarios": list(self.usuarios_online)}),
+            destination=f"/queue/registro.{usuario}"
+          )
+          self.enviar_lista_usuarios()
+          print(f"[ENVIO] Lista de usuários para {usuario}: {self.usuarios_online}")
 
       elif acao == "logout":
         if usuario in self.usuarios_online:
           self.usuarios_online.remove(usuario)
           print(f"[LOGOUT] {usuario} desconectou.")
+          self.enviar_lista_usuarios()
     except Exception as e:
       print(f"[ERRO] Falha ao processar mensagem: {e}")
+
+  def enviar_lista_usuarios(self):
+    lista = list(self.usuarios_online)
+    self.conn.send(
+      body=json.dumps({"usuarios": lista}),
+      destination="/topic/usuarios"
+    )
+    print(f"[ATUALIZAÇÃO] Lista de usuários: {lista}")
 
 if __name__ == "__main__":
   GerenciadorUsuarios()

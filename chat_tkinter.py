@@ -17,16 +17,18 @@ class ChatListener(stomp.ConnectionListener):
     self.display_callback = display_callback
 
   def on_message(self, frame):
-    self.display_callback(f"[RECEBIDO] {frame.body}")
+    try:
+      dados = json.loads(frame.body)
+      if "usuarios" in dados:
+        self.display_callback({"tipo": "usuarios", "dados": dados["usuarios"]})
+      else:
+        self.display_callback(f"[RECEBIDO] {frame.body}")
+    except:
+      self.display_callback(f"[RECEBIDO] {frame.body}")
 
 class ChatApp:
   def __init__(self, root, nome_usuario):
-    self.topicos_disponiveis = [
-      "/topic/chat.geral",
-      "/topic/chat.jogos",
-      "/topic/chat.musica",
-      "/topic/chat.programacao"
-    ]
+    self.topicos_disponiveis = []
 
     self.topico_ids = {}  # topico -> id
     self.root = root
@@ -38,57 +40,71 @@ class ChatApp:
     self.topico_global = "/topic/chat.geral"
     
     # Interface
-    self.mensagens = scrolledtext.ScrolledText(root, wrap=tk.WORD, state='disabled', height=20)
+    self.frame_chat = tk.Frame(root)
+    self.frame_opcoes = tk.Frame(root)
+    self.frame_chat.pack(side=tk.LEFT)
+    self.frame_opcoes.pack(padx=10)
+
+    self.mensagens = scrolledtext.ScrolledText(self.frame_chat, wrap=tk.WORD, state='disabled', height=20)
     self.mensagens.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
 
-    # self.destino_label = tk.Label(root, text="Enviar para (usuário ou 'topico'):")
-    # self.destino_label.pack()
-    # self.destino_entry = tk.Entry(root)
-    # self.destino_entry.pack(fill=tk.X, padx=10)
-    self.topico_label = tk.Label(root, text="Selecionar tópico:")
+    self.topico_label = tk.Label(self.frame_opcoes, text="Selecionar tópico:")
     self.topico_label.pack()
     self.topico_var = tk.StringVar(value=self.topicos_disponiveis[0])
-    self.topico_combo = ttk.Combobox(root, textvariable=self.topico_var, values=self.topicos_disponiveis, state='readonly')
+    self.topico_combo = ttk.Combobox(self.frame_opcoes, textvariable=self.topico_var, values=self.topicos_disponiveis, state='readonly')
     self.topico_combo.pack(fill=tk.X, padx=10)
 
-    self.novo_topico_label = tk.Label(root, text="Novo tópico (nome simples):")
+    self.novo_topico_label = tk.Label(self.frame_opcoes, text="Novo tópico (nome simples):")
     self.novo_topico_label.pack()
-    self.novo_topico_entry = tk.Entry(root)
+    self.novo_topico_entry = tk.Entry(self.frame_opcoes)
     self.novo_topico_entry.pack(fill=tk.X, padx=10)
 
-    self.btn_add_topico = tk.Button(root, text="Adicionar Tópico", command=self.adicionar_topico)
-    self.btn_add_topico.pack(pady=5)
+    self.frame_botoes = tk.Frame(self.frame_opcoes)
+    self.frame_botoes.pack(pady=5)
 
-    self.btn_remover_topico = tk.Button(root, text="Remover Tópico", command=self.remover_topico)
-    self.btn_remover_topico.pack(pady=5)
+    self.btn_add_topico = tk.Button(self.frame_botoes, text="Adicionar Tópico", command=self.adicionar_topico)
+    self.btn_add_topico.pack(pady=5, side=tk.LEFT, padx=5)
 
-    self.btn_verificar_filas = tk.Button(root, text="Verificar Filas", command=self.listar_filas_com_mensagens)
-    self.btn_verificar_filas.pack(pady=5)
+    self.btn_remover_topico = tk.Button(self.frame_botoes, text="Remover Tópico", command=self.remover_topico)
+    self.btn_remover_topico.pack(pady=5, side=tk.LEFT, padx=5)
 
-    self.lista_label = tk.Label(root, text="Tópicos assinados:")
-    self.lista_label.pack()
-    self.lista_topicos = tk.Listbox(root, height=6)
-    self.lista_topicos.pack(fill=tk.X, padx=10, pady=5)
+    self.btn_verificar_filas = tk.Button(self.frame_botoes, text="Verificar Filas", command=self.listar_filas_com_mensagens)
+    self.btn_verificar_filas.pack(pady=5, side=tk.LEFT, padx=5)
 
-    self.usuarios_label = tk.Label(root, text="Usuários online:")
-    self.usuarios_label.pack()
-    self.lista_usuarios = tk.Listbox(root, height=6)
-    self.lista_usuarios.pack(fill=tk.X, padx=10, pady=5)
+    self.btn_encerrar_privado = tk.Button(self.frame_botoes, text="Encerrar conversa privada", command=self.encerrar_conversa_privada)
+    self.btn_encerrar_privado.pack(pady=5)
+
+    self.frame_infos = tk.Frame(self.frame_opcoes)
+    self.frame_usuarios = tk.Frame(self.frame_infos)
+    self.frame_topicos = tk.Frame(self.frame_infos)
+    self.frame_infos.pack(pady=5)
+    self.frame_usuarios.pack(side=tk.LEFT)
+    self.frame_topicos.pack(side=tk.RIGHT)
+
+    self.lista_label = tk.Label(self.frame_topicos, text="Tópicos assinados:")
+    self.lista_label.pack(side=tk.TOP)
+    self.lista_topicos = tk.Listbox(self.frame_topicos, height=6)
+    self.lista_topicos.pack(side=tk.BOTTOM)
+
+    self.usuarios_label = tk.Label(self.frame_usuarios, text="Usuários online:")
+    self.usuarios_label.pack(side=tk.TOP)
+    self.lista_usuarios = tk.Listbox(self.frame_usuarios, height=6)
+    self.lista_usuarios.pack(side=tk.BOTTOM)
     self.lista_usuarios.bind("<<ListboxSelect>>", self.selecionar_usuario)
 
-
-    self.input_entry = tk.Entry(root)
+    self.input_entry = tk.Entry(self.frame_chat)
     self.input_entry.pack(fill=tk.X, padx=10)
     self.input_entry.bind("<Return>", self.enviar_mensagem)
 
-    self.enviar_btn = tk.Button(root, text="Enviar", command=self.enviar_mensagem)
+    self.enviar_btn = tk.Button(self.frame_chat, text="Enviar", command=self.enviar_mensagem)
     self.enviar_btn.pack(pady=5)
 
     # Conectar STOMP
     self.conn = stomp.Connection([(BROKER, PORTA)])
-    self.conn.set_listener('', ChatListener(self.nome, self.exibir_mensagem))
     self.conn.connect(USUARIO, SENHA, wait=True)
+    self.conn.set_listener('', ChatListener(self.nome, self.exibir_mensagem))
     self.conn.subscribe(destination=self.fila_privada, id=1, ack='auto')
+    self.conn.subscribe(destination="/topic/usuarios", id=9999, ack='auto')
     for i, topico in enumerate(self.topicos_disponiveis, start=100):
       self.conn.subscribe(destination=topico, id=i, ack='auto')
       self.topico_ids[topico] = i
@@ -103,6 +119,10 @@ class ChatApp:
     self.destino_privado = None  # Armazena o nome de um usuário selecionado
 
   def exibir_mensagem(self, msg):
+    if isinstance(msg, dict):
+      if msg.get("tipo") == "usuarios":
+        self.atualizar_usuarios_online(msg["dados"])
+      return  # Não exibe no campo de mensagens
     self.mensagens.configure(state='normal')
     self.mensagens.insert(tk.END, msg + "\n")
     self.mensagens.configure(state='disabled')
@@ -117,7 +137,6 @@ class ChatApp:
       destino = f"/queue/{self.destino_privado}"
       self.conn.send(body=f"{self.nome} (privado): {corpo}", destination=destino)
       self.exibir_mensagem(f"[ENVIADO] para {self.destino_privado}: {corpo}")
-      self.destino_privado = None  # Resetar após envio
     else:
       destino = self.topico_var.get()
       self.conn.send(body=f"{self.nome} (tópico): {corpo}", destination=destino)
@@ -223,6 +242,10 @@ class ChatApp:
       if usuario != self.nome:  # Evitar mostrar o próprio nome
         self.lista_usuarios.insert(tk.END, usuario)
 
+  def encerrar_conversa_privada(self):
+    self.destino_privado = None
+    self.exibir_mensagem("[Info] Conversa privada encerrada. Mensagens irão para o tópico selecionado.")
+
   def logout(self):
     try:
       # Enviar uma mensagem especial de logout (opcional)
@@ -256,15 +279,17 @@ def iniciar_interface():
     def on_message(self, frame):
       try:
         dados = json.loads(frame.body)
-        if dados.get("usuario") == nome:
+        if "status" in dados and dados.get("usuario") == nome:
           resultado['status'] = dados.get("status")
           evento_resposta.set()
-      except:
-        pass
+        elif "usuarios" in dados:
+          resultado['usuarios'] = dados["usuarios"]
+      except Exception as e:
+        print(f"[Erro no listener de registro] {e}")
 
   temp_conn.set_listener('', RegistroListener())
   temp_conn.connect(USUARIO, SENHA, wait=True)
-  temp_conn.subscribe(destination=f"/queue/retorno.{nome}", id=999, ack='auto')
+  temp_conn.subscribe(destination=f"/queue/registro.{nome}", id=999, ack='auto')
 
   # Envia mensagem de registro
   msg = {
@@ -289,7 +314,9 @@ def iniciar_interface():
 
   # Iniciar interface gráfica
   root = tk.Tk()
+  usuarios = resultado.get("usuarios", [])
   app = ChatApp(root, nome)
+  app.atualizar_usuarios_online(usuarios)
   root.protocol("WM_DELETE_WINDOW", app.logout)
   root.mainloop()
 
