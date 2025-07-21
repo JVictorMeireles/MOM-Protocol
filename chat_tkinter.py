@@ -28,7 +28,7 @@ class ChatListener(stomp.ConnectionListener):
 
 class ChatApp:
   def __init__(self, root, nome_usuario):
-    self.topicos_disponiveis = []
+    self.topicos_disponiveis = ["/topic/geral"]
 
     self.topico_ids = {}  # topico -> id
     self.root = root

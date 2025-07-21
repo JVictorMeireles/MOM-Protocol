@@ -1,0 +1,56 @@
+('C:\\Users\\João '
+ 'Victor\\OneDrive\\Documentos\\GitHub\\MOM-Protocol\\build\\gerenciador\\gerenciador.pkg',
+ {'BINARY': True,
+  'DATA': True,
+  'EXECUTABLE': True,
+  'EXTENSION': True,
+  'PYMODULE': True,
+  'PYSOURCE': True,
+  'PYZ': False,
+  'SPLASH': True,
+  'SYMLINK': False},
+ [('pyi-contents-directory _internal', '', 'OPTION'),
+  ('PYZ-00.pyz',
+   'C:\\Users\\João '
+   'Victor\\OneDrive\\Documentos\\GitHub\\MOM-Protocol\\build\\gerenciador\\PYZ-00.pyz',
+   'PYZ'),
+  ('struct',
+   'C:\\Users\\João '
+   'Victor\\OneDrive\\Documentos\\GitHub\\MOM-Protocol\\build\\gerenciador\\localpycs\\struct.pyc',
+   'PYMODULE'),
+  ('pyimod01_archive',
+   'C:\\Users\\João '
+   'Victor\\OneDrive\\Documentos\\GitHub\\MOM-Protocol\\build\\gerenciador\\localpycs\\pyimod01_archive.pyc',
+   'PYMODULE'),
+  ('pyimod02_importers',
+   'C:\\Users\\João '
+   'Victor\\OneDrive\\Documentos\\GitHub\\MOM-Protocol\\build\\gerenciador\\localpycs\\pyimod02_importers.pyc',
+   'PYMODULE'),
+  ('pyimod03_ctypes',
+   'C:\\Users\\João '
+   'Victor\\OneDrive\\Documentos\\GitHub\\MOM-Protocol\\build\\gerenciador\\localpycs\\pyimod03_ctypes.pyc',
+   'PYMODULE'),
+  ('pyimod04_pywin32',
+   'C:\\Users\\João '
+   'Victor\\OneDrive\\Documentos\\GitHub\\MOM-Protocol\\build\\gerenciador\\localpycs\\pyimod04_pywin32.pyc',
+   'PYMODULE'),
+  ('pyiboot01_bootstrap',
+   'C:\\Users\\João '
+   'Victor\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\PyInstaller\\loader\\pyiboot01_bootstrap.py',
+   'PYSOURCE'),
+  ('pyi_rth_inspect',
+   'C:\\Users\\João '
+   'Victor\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\PyInstaller\\hooks\\rthooks\\pyi_rth_inspect.py',
+   'PYSOURCE'),
+  ('gerenciador',
+   'C:\\Users\\João '
+   'Victor\\OneDrive\\Documentos\\GitHub\\MOM-Protocol\\gerenciador.py',
+   'PYSOURCE')],
+ 'python312.dll',
+ True,
+ False,
+ False,
+ [],
+ None,
+ None,
+ None)
